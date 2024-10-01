@@ -35,23 +35,13 @@ import GamePad from "./Components/GamePad";
 import Grid from './Components/Grid';
 import SideGrid from "./Components/SideGrid"
 
-import {
-  NUMBER_OF_CELLS_HORIZONTAL,
-  NUMBER_OF_CELLS_VERTICAL,
-  GAME_SPEED
-} from './Constants';
-
-import {
-  addScore
-} from './Data/score';
-
 import Score from './Components/Score';
 
 export default function App( {
   navigation
 }) {
-  globalState.hook("settings.gamePad")
-
+  globalState.hook("dbContextChanged")
+ let audioState = globalState.audio.useAudioState();
   const[running,
     setRunning] = useState(true);
   const[score,
@@ -62,6 +52,7 @@ export default function App( {
   }).ignore("engine").build();
 
   useEffect(()=> {
+    globalState.game.resetLevel().levelSetting.generatingLevel = true;
     globalState.game.create();
     globalState.audio.gameTrack();
     globalState.audio.bind = true;
@@ -77,7 +68,7 @@ export default function App( {
       setRunning(false);
 
       if (score > 0) {
-        await addScore(score);
+        await globalState.dbContext.settings.addScore(score);
         let gameMenuFunction = navigation.getParam('setGameOver');
         gameMenuFunction(true);
       }
@@ -99,9 +90,9 @@ export default function App( {
   };
 
 
-  const GestureRecognizerView = globalState.settings.gamePad ? View: SlideDetector;
+  const GestureRecognizerView = globalState.dbContext.settings.gamePad ? View: SlideDetector;
   return(
-    <SafeAreaView css="container fld:row juc:flex-start ali:flex-start">
+    <SafeAreaView bgStyle={{opacity:.2}} bg={audioState.bg} css="container fld:row juc:flex-start ali:flex-start">
 
       <GestureRecognizerView
         onSwipeUp={() => state.engine.dispatch({ type: "rotate" })}
@@ -116,8 +107,8 @@ export default function App( {
               entities={ {
                 grid: {
                   //Velocidade do jogo
-                  nextMove: GAME_SPEED,
-                  updateFrequency: GAME_SPEED,
+                  nextMove: globalState.dbContext.settings.gameValidSpeed(),
+                  updateFrequency: globalState.dbContext.settings.gameValidSpeed(),
                   //Conponente rederizado
                   renderer: <Grid />
                 }

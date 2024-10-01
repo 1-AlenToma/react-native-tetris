@@ -3,11 +3,14 @@ import {createStackNavigator} from 'react-navigation-stack';
 import GameMenu from './GameMenu';
 import Game from './Game';
 import {useEffect} from "react";
+import {Loader} from "./Controllers";
 
 
 const MainNavigator = createStackNavigator({
-    GameMenu: {screen: GameMenu},
-    Game: {screen: Game},
+    GameMenu: { screen: GameMenu },
+    Game: { screen: Game }
+},{
+  initialRouteName:"GameMenu"
 });
 
 // Hide the header from GameMenu stack
@@ -24,14 +27,13 @@ const App = createAppContainer(MainNavigator);
 
 const Main = ()=>{
  const [loaded]= useFont();
-  globalState.hook("screen")
+  globalState.hook("screen","loaded")
   useEffect(()=>{
-    let itemToRemove = globalState.init();
-    return ()=> itemToRemove.forEach(x=> x?.remove())
-  },[])
+     globalState.init();
+  },[]);
   
-  if(!loaded)
-    return null;
+  if(!loaded || !globalState.loaded)
+    return <Loader loading={globalState.loaded} />;
   
   return <App />
 }

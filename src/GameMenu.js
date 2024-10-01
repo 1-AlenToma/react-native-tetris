@@ -1,6 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, {
+  useState,
+  useEffect
+} from 'react';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import Slider from '@react-native-community/slider';
+
 
 //animacoes
 import * as Animatable from 'react-native-animatable';
@@ -15,42 +19,78 @@ import {
   SafeAreaView,
   Text,
   Image
-} from "./Controllers/index"
+} from "./Controllers";
+
+import GamePad from "./Components/GamePad"
 
 
-export default function GameMenu({navigation}){
-    const[gameOver, setGameOver] = useState(true);
-    const[bestScores, setBestScores] = useState(null);
+export default function GameMenu( {
+  navigation
+}) {
+  globalState.hook("dbContextChanged");
+  const[gameOver,
+    setGameOver] = useState(true);
 
-    useEffect(() => {
-        async function scores(){
-            try{
-                let data = await AsyncStorage.getItem('Best_Scores')
-                setBestScores(JSON.parse(data));
-                setGameOver(false);
-            }catch(e){
-                console.log(e);
-            }
-        }
+  const bestScores = globalState.dbContext.settings.scores;
 
-        if(gameOver == true){
-            scores();
-        }
-    }, [gameOver]);
+  useEffect(() => {
+    if (gameOver == true) {
+      setGameOver(false);
+    }
+  },
+    [gameOver]);
 
-    return(
-        <SafeAreaView bg={require("./assets/black-bg.jpg")} css="container">
-          <View css="container bac:transparent">
-            <Image source={logo} css="logo"/>
-            <Animatable.View animation="rubberBand" easing="ease-out" iterationCount="infinite">
-                <TouchableOpacity css="btnStart" onPress={() => navigation.navigate('Game', { setGameOver })}>
-                    <Text css="txtBtnStart">Start</Text>
-                </TouchableOpacity>
-            </Animatable.View>
+  return(
+    <SafeAreaView bg={require("./assets/tetrisPlayBg_2.gif")} css="container">
+      <View css="container wi:100% bac:transparent">
+        <Image source={logo} css="logo" />
+        <Animatable.View animation="rubberBand" easing="ease-out" iterationCount="infinite">
+          <TouchableOpacity css="btnStart" onPress={() => navigation.navigate('Game', { setGameOver })}>
+            <Text css="txtBtnStart">Start: (Level:{globalState.dbContext.settings.currentLevel})</Text>
+          </TouchableOpacity>
+          <TouchableOpacity css="mat:10 btnStart" onPress={() => navigation.navigate('Game', { setGameOver })}>
+            <Text css="txtBtnStart">Start: (Endless Mode)</Text>
 
-            <BestScores data={bestScores}></BestScores>
-            </View>
-        </SafeAreaView>
-    )
+          </TouchableOpacity>
+        </Animatable.View>
+        <TouchableOpacity css="btnStart mat:10 bor:5 bac:#131313" onPress={() => {
+          globalState.dbContext.settings.inc();
+        }}>
+          <Text css="txtBtnStart pav:5">Speed: {
+            (globalState.dbContext.settings.gameSpeed - globalState.dbContext.settings.gameDefaultSpeed) +1
+            }</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity css="btnStart mat:10 bor:5 bac:#131313" onPress={() => {
+          globalState.dbContext.settings.gamePad = !globalState.dbContext.settings.gamePad;
+        }}>
+          <Text css="txtBtnStart pav:5">GamePadType: {
+            !globalState.dbContext.settings.gamePad ? "Touch & Swap": "Buttons"
+            }</Text>
+        </TouchableOpacity>
+        <View ifTrue={
+        globalState.dbContext.settings.gamePad
+          
+        } css="fld:row txtBtnStart mat:10 pav:5 bor:5 bac:#131313">
+          <Text css="txtBtnStart pav:5">Opacity:</Text>
+          <Slider
+            onValueChange={(v)=>{
+              globalState.dbContext.settings.gamePadOpacity=Math.round(v * 10) / 10
+            }}
+            style={ { width: "50%",
+              height: 40 }}
+            step={0.1}
+            value={globalState.dbContext.settings.gamePadOpacity}
+            minimumValue={0}
+            maximumValue={1}
+            minimumTrackTintColor="#FFFFFF"
+            maximumTrackTintColor="#000000"
+            />
+        </View>
+        
+        <BestScores data={bestScores}></BestScores>
+        <GamePad preview={true}/>
+      </View>
+    </SafeAreaView>
+  )
 }
-

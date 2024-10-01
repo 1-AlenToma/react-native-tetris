@@ -44,6 +44,12 @@ global.randomBetween = (min, max) => {
 }
 global.randomColor = (option)=> RandomColor(option);
 global.emptyArray = (nr)=> Array.from(Array(nr).keys());
+global.removeKeys = (item, ...keys)=> {
+  for(let key of keys){
+    if(key in item)
+      delete item[key];
+  }
+}
 global.newId = ()=> uuid.v4();
 global.globalState =globalState;
 global.buildState = useState;

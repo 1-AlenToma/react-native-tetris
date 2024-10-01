@@ -26,13 +26,13 @@ export const styles = StyleSheet.create({
     position: "absolute"
   },
 
-  gamepad: `zi:2 op:.2 sta fld:row bo:0 fl:1 wi:100% he:${gamePadHeight} juc:center ali:center bac:red  bor:5 bow:0 bac:transparent`,
+  gamepad: `zi:2 sta fld:row bo:40 fl:1 wi:100% he:${gamePadHeight} juc:center ali:center bac:red  bor:5 bow:0 bac:transparent`,
 
   "gamepad.View": `he:${gamePadHeight} ali:center juc:center`,
 
   "gamepadCenter": `wi:250 he:100% mih:${gamePadSize+20}`,
 
-  "gamepadTouchableOpacity": `op:.2 juc:center ali:center he:100% wi:${gamePadSize} mih:${gamePadSize}`,
+  "gamepadTouchableOpacity": `juc:center ali:center he:100% wi:${gamePadSize} mih:${gamePadSize}`,
 
   container: {
     flex: 1,
@@ -50,8 +50,8 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  
-  
+
+
 
   lineContainer: "po:absolute le:0 top:0 wi:100% he:100% fld:row",
 
@@ -60,9 +60,9 @@ export const styles = StyleSheet.create({
     borderColor: "#fff",
     opacity: 0.5,
   },
-  
+
   "lineContainer.lightView": "bac:#083e38",
-  
+
   buttons: {
     flexDirection: 'row'
   },
@@ -77,9 +77,7 @@ export const styles = StyleSheet.create({
     marginBottom: 30
   },
 
-  btnStart: {
-    backgroundColor: '#FFF',
-  },
+  btnStart: "bor:5 bac:#fff",
 
   txtBtnStart: {
     fontSize: 20,
@@ -103,6 +101,7 @@ const views = {};
 const GenericView = (props) => {
   const {
     bg,
+    bgStyle,
     ifTrue,
     viewName,
     size,
@@ -118,14 +117,13 @@ const GenericView = (props) => {
       return null;
   }
   let image = null;
-  if (bg) {
-    image = (<ImageBackground source={bg} resizeMode="cover" style={ {
-      flex: 1, justifyContent: "center",
+  if (bg !== undefined) {
+    image = (<ImageBackground source={bg} resizeMode="cover" style={[{
+      flex: 0, position: "absolute", left: 0, top: 0, height: "100%", justifyContent: "center",
       width: "100%"
-    }}>
-      {children}
-    </ImageBackground>)
+    },bgStyle]} />)
   }
+  
 
   const stArray = serArray(style);
   if (typeof size === "function") {
@@ -133,7 +131,14 @@ const GenericView = (props) => {
   }
   const VIEW = views[viewName];
   return <VIEW {...props} size={size} style={stArray}>
-    {image || children}
+    {viewName !== "Image"
+    ? (
+      <>
+        {image}
+        {children}
+      </>
+    ): null
+    }
   </VIEW>
 }
 

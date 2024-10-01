@@ -69,15 +69,18 @@ export default function Grid() {
   return (
     <View css="gcontainer" style={ {
       width: globalState.WIDTH_SCREEN,
-      height: globalState.HEIGHT_SCREEN-25
+      height: globalState.HEIGHT_SCREEN,
     }}>
       <View css="grid" style={ {
         width: globalState.WIDTH_SCREEN,
         height: globalState.HEIGHT_SCREEN
       }}>
+        <View css="grid pat:24">
+          {finalCells}
+        </View>
         <Lines grid={grid} validPieces={validPieces} />
-        {finalCells}
       </View>
+
     </View>
   )
 }

@@ -6,7 +6,24 @@ export default class GridPieces {
   renderedPieces = {};
   currentPiece = null;
   nextPieces = [];
-  grid = []
+  grid = [];
+  levelSetting = {
+    generatingLevel: false,
+    totalGenerated: 0,
+    lastPosition: undefined,
+    totalpointToClear: 0
+  }
+
+
+  resetLevel() {
+    this.levelSetting.generatingLevel = false;
+    this.levelSetting.totalGenerated = 0;
+    this.levelSetting.lastPosition = undefined;
+    this.renderedPieces = {};
+    this.currentPiece = null;
+    this.nextPieces = [];
+    return this;
+  }
 
   updatePieces() {
     if (!this.currentPiece) {
@@ -27,8 +44,29 @@ export default class GridPieces {
     return this.currentPiece?.position.length;
   }
 
+  createLevel() {
+    const totalBlocksToRender = this.grid.length /2;
+    // create level map later to calculate betterl!
+    this.levelSetting.totalpointToClear = totalBlocksToRender * randomBetween(100,500);
+    //logOnce(this.levelSetting.totalpointToClear)
+    if (this.levelSetting.generatingLevel) {
+      if (this.levelSetting.totalGenerated < totalBlocksToRender) {
+        return true;
+      } else {
+        this.levelSetting.generatingLevel = false;
+      }
+    } else if (this.levelSetting.totalGenerated < totalBlocksToRender) {
+      this.levelSetting.generatingLevel = true;
+      return true;
+    }
+    return false;
+  }
+
   renderPiece = () => {
-    const middleColumn = Math.floor(this.grid[0].length/2);
+    let middleColumn = this.grid[0][0];
+    while ((middleColumn = this.levelSetting.generatingLevel? randomBetween(0, this.grid[0].length-2): Math.floor(this.grid[0].length/2)) == this.levelSetting.lastPosition && this.levelSetting.generatingLevel);
+
+    this.levelSetting.lastPosition = middleColumn;
     const blockRegister = {
       "0": new Piece("o", "blue", null)
       .add(
@@ -102,11 +140,14 @@ export default class GridPieces {
         -3, middleColumn,
         -2, middleColumn,
         -1, middleColumn
-      ) //I
+      ) //I,
     }
 
     let piece = blockRegister[randomBetween(0, Object.keys(blockRegister).length-1).toString()];
-    
+
+    if (piece.position[0].x < 0 || piece.position[0].x > this.grid[0].length-2)
+      return this.renderPiece();
+
     //loogOnce()
 
     return piece;
@@ -180,7 +221,7 @@ export default class GridPieces {
               this.grid[this.currentPiece.path[j][0]][this.currentPiece.path[j][1]] = this.currentPiece.path[4];
           }
 
-          if (aux[i][0] == 0) {
+          if (aux[i][0] == 0 && !this.levelSetting.generatingLevel) {
             dispatch( {
               type: "game-over"
             });
@@ -284,7 +325,7 @@ export default class GridPieces {
         for (let j = 0; j < 4; j++) {
           if (this.currentPiece.path[j][0] >= 0)
             this.grid[this.currentPiece.path[j][0]][this.currentPiece.path[j][1]] = this.currentPiece.path[4];
-            
+
         }
         return;
       }
@@ -314,13 +355,13 @@ export default class GridPieces {
     }
 
     //If not, copy the new value to the current part
-    
+
     for (let i = 0; i < 4; i++) {
-      if (aux[i][0] >= 0 && aux[i][0] < this.grid.length){
+      if (aux[i][0] >= 0 && aux[i][0] < this.grid.length) {
         //console.warn("cpoy")
         this.grid[aux[i][0]][aux[i][1]] = aux[4];
       }
-        
+
       this.currentPiece.path[i][0] = aux[i][0];
       this.currentPiece.path[i][1] = aux[i][1];
     }
@@ -333,8 +374,14 @@ export default class GridPieces {
   }) {
 
     this.updatePieces();
-    
 
+    if (this.levelSetting.generatingLevel && this.createLevel()) {
+      globalState.audio.disabled = true;
+      this.rotateCurrentPiece();
+
+      while (this.downPiece(dispatch));
+      this.levelSetting.totalGenerated = Object.keys(this.renderedPieces).length;
+    }else globalState.audio.disabled = false;
     if (events.length) {
       for (let i = 0; i < events.length; i++) {
         if (events[i].type === 'move-left') {
@@ -378,9 +425,11 @@ export default class GridPieces {
             this.grid.unshift(newLine);
 
             i++;
-
-            dispatch( {
-              type: "add-score", score: 100*(++bonus)});
+            if (!this.levelSetting.generatingLevel) {
+              dispatch( {
+                type: "add-score",
+                score: 100*(++bonus)});
+            }
           }
         }
       }

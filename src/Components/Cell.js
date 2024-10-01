@@ -11,14 +11,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 
 
-import green from './../assets/green.png';
-import blue from './../assets/blue.png';
-import brown from './../assets/brown.png';
-import pink from './../assets/pink.png';
-import purple from './../assets/purple.png';
-import red from './../assets/red.png';
-import yellow from './../assets/yellow.png';
-import gray from './../assets/gray.png';
+
 
 import {
   CELL_LENGTH

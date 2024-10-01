@@ -1,40 +1,24 @@
 import React from 'react';
 import {
-    View,
-    Text,
-    StyleSheet
-} from 'react-native';
+  View,
+  Text
+} from "../Controllers";
 
-export default function BestScores({data}){
-    const renderScores = () => {
-        return data.map(
-            (element, index) => <Text key={index} style={styles.text}> #{index+1} - {element} </Text>
+export default function BestScores( {
+  data
+}) {
+
+
+  return (
+    <View ifTrue={() => data && data.length > 0} css="sta le:5 to:40 pal:30 pab:80">
+      <View>
+        <Text css="fos:20 co:#fff fow:bold mab:5">Best scores</Text>
+        {
+        data.map(
+          (element, index) => <Text key={index} css="co:#fff"> #{index+1} - {element} </Text>
         )
-    }
-    
-    return (
-        <View style={styles.container}>
-            {data && 
-                <View style={styles.scores}>
-                    <Text style={[styles.text, {fontSize: 20, marginBottom: 5}]}>Best scores</Text>
-                    {renderScores()}
-                </View>
-            }
-        </View>
-    );
+        }
+      </View>
+    </View>
+  );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        paddingLeft: 30,
-        paddingBottom: 80
-    },
-
-    text:{
-        fontSize: 14,
-        color: '#FFF'
-    }
-});

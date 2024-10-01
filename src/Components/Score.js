@@ -4,27 +4,12 @@ import {
     Text,
     StyleSheet,
     Dimensions
-} from 'react-native';
+} from '../Controllers';
 
 export default function Score({score}){
     return (
-        <SafeAreaView style={styles.score}>
-            <Text style={styles.txtScore}>Score: { score }</Text>
+        <SafeAreaView css="wi:100% he:50, bac:#141515 pa:5 juc:center ali:center">
+            <Text css="co:#fff fos:22 fow:bold" >Score: { score }</Text>
         </SafeAreaView>
     )
 }
-
-const styles = StyleSheet.create({
-    score: {
-        height: 50,
-        width: Dimensions.get('window').width,
-        backgroundColor: '#F08080',
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-
-    txtScore: {
-        color: '#FFF',
-        fontSize: 22
-    }
-});

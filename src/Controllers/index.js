@@ -1,5 +1,6 @@
 import Controller from "./NativeViews";
 import SlideDetector from "./SlideDetector";
+import Loader from "./Loader";
 
 const {
   View,
@@ -16,5 +17,6 @@ export {
   SafeAreaView,
   Image,
   Icon,
-  SlideDetector
+  SlideDetector,
+  Loader
 }

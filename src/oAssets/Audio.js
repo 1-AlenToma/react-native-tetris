@@ -1,28 +1,29 @@
 import {
   Audio
 } from 'expo-av';
-class AudioEffects {
+import EventTracker from "./EventTracker"
+import {
+  useState
+} from "react"
+class AudioEffects extends EventTracker {
   createdAudio = undefined;
   playing = false;
   trackAudio = undefined;
   bind = false;
+  disabled= false;
   async play(file, volume) {
-
+    if(this.disabled)
+       return;
+       
     if (this.createdAudio) {
-      try{
-      await this.createdAudio.sound.unloadAsync();
-      }catch{}
+      try {
+        await this.createdAudio.sound.unloadAsync();
+      }catch {}
     }
     const audio = await Audio.Sound.createAsync(file, {
-      shouldPlay: true, volume:volume ?? .2
+      shouldPlay: true, volume: volume ?? .2
     });
     this.createdAudio = audio;
-
-    //else alert(JSON.stringify(this.createdAudio[file].status))
-    //await this.createdAudio[file].unloadAsync(file);
-    //await this.createdAudio[file].loadAsync();
-    // await this.createdAudio[file].sound.playAsync();
-    // await this.createdAudio[file].sound?.unloadAsync();
   }
 
   async clear() {
@@ -37,7 +38,7 @@ class AudioEffects {
 
   async gameOver() {
     let file = require("../assets/sound/effects/gameOver.wav");
-    this.play(file,1);
+    this.play(file, 1);
   }
 
   async stopAll() {
@@ -48,8 +49,32 @@ class AudioEffects {
     }catch {}
   }
 
+  useAudioState() {
+    let tracBackgrounds = [
+      require("../assets/tetrisPlayBg.gif"),
+      require("../assets/tetrisPlayBg_1.gif"),
+      require("../assets/tetrisPlayBg_2.gif"),
+      require("../assets/tetrisPlayBg_3.gif")
+    ]
+    const [state,
+      setState] = useState( {
+        bg: tracBackgrounds[randomBetween(0, tracBackgrounds.length -1)]
+      });
+
+    this.bindEvent("audioState", ()=> {
+      setState({
+        ...state,
+        bg: tracBackgrounds[randomBetween(0, tracBackgrounds.length -1)]
+      });
+    });
+
+    return state;
+  }
+
   async gameTrack() {
     try {
+      if(this.disabled)
+       return;
       await this.stopAll();
       if (!this.bind)
         return;
@@ -74,14 +99,14 @@ class AudioEffects {
       const statusCheck = async ()=> {
         let status = await sound.getStatusAsync();
         if (!status.isPlaying && this.bind) {
-          console.info("track finished")
+          this.getEvent("audioState")?.();
           this.gameTrack();
           return;
         }
         if (this.bind)
           setTimeout(()=>statusCheck(), 100)
       }
-      
+
       this.trackAudio = sound;
       statusCheck();
     }catch(e) {
