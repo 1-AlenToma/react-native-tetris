@@ -3,6 +3,7 @@ import {styles} from "./src/Controllers/NativeViews"
 import {
   useFonts
 } from 'expo-font';
+import {Missions} from "./src/oAssets";
 import uuid from 'react-native-uuid';
 var RandomColor = require('randomcolor'); // import the script
 
@@ -49,6 +50,11 @@ global.removeKeys = (item, ...keys)=> {
     if(key in item)
       delete item[key];
   }
+}
+// mode Random or Endless
+global.getGameConfig = (mode)=>{
+  let mission = new Missions(mode);
+  return mission;
 }
 global.newId = ()=> uuid.v4();
 global.globalState =globalState;

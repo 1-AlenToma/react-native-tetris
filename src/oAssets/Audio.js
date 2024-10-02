@@ -5,6 +5,7 @@ import EventTracker from "./EventTracker"
 import {
   useState
 } from "react"
+let timeout = undefined;
 class AudioEffects extends EventTracker {
   createdAudio = undefined;
   playing = false;
@@ -12,9 +13,7 @@ class AudioEffects extends EventTracker {
   bind = false;
   disabled= false;
   async play(file, volume) {
-    if(this.disabled)
-       return;
-       
+    
     if (this.createdAudio) {
       try {
         await this.createdAudio.sound.unloadAsync();
@@ -40,12 +39,25 @@ class AudioEffects extends EventTracker {
     let file = require("../assets/sound/effects/gameOver.wav");
     this.play(file, 1);
   }
+  
+  disable(){
+    //clearTimeout(timeout)
+    this.disabled = true;
+    this.stopAll();
+    
+    return this;
+  }
+  
+  enable(){
+    this.disabled = false;
+    return this;
+  }
 
   async stopAll() {
     try {
       // await this.trackAudio?.stopAsync?.();
-
-      await this.trackAudio?.unloadAsync();
+      
+      await this.trackAudio?.sound?.unloadAsync();
     }catch {}
   }
 
@@ -62,9 +74,10 @@ class AudioEffects extends EventTracker {
       });
 
     this.bindEvent("audioState", ()=> {
+      let tracs = tracBackgrounds.filter(x=> x!== state);
       setState({
         ...state,
-        bg: tracBackgrounds[randomBetween(0, tracBackgrounds.length -1)]
+        bg: tracs[randomBetween(0, tracs.length -1)]
       });
     });
 
@@ -73,6 +86,7 @@ class AudioEffects extends EventTracker {
 
   async gameTrack() {
     try {
+      
       if(this.disabled)
        return;
       await this.stopAll();
@@ -89,25 +103,22 @@ class AudioEffects extends EventTracker {
       while ((file = tracks[Math.ceil(Math.random() * tracks.length)]) === undefined) {
         await sleep(10)
       }
-      const {
-        sound
-      } = await Audio.Sound.createAsync(file, {
-          shouldPlay: true,
-          progressUpdateIntervalMillis: 100
+      this.trackAudio = await Audio.Sound.createAsync(file, {
+          shouldPlay: true
         });
 
       const statusCheck = async ()=> {
-        let status = await sound.getStatusAsync();
-        if (!status.isPlaying && this.bind) {
+        let status = await this.trackAudio.sound.getStatusAsync();
+        if (!status.isPlaying && this.bind && !this.disabled) {
           this.getEvent("audioState")?.();
           this.gameTrack();
           return;
         }
-        if (this.bind)
+        if (this.bind && !this.disabled)
           setTimeout(()=>statusCheck(), 100)
       }
 
-      this.trackAudio = sound;
+    
       statusCheck();
     }catch(e) {
       console.error(e)

@@ -2,16 +2,11 @@ import Settings from "./Settings";
 
 export default class DBContext{
   settings;
-  onChange;
-  constructor(onChange){
-    this.onChange = onChange;
-  }
-  
   async load(){
-    this.settings = await new Settings().load();
-    
-    this.settings.onSave = this.onChange;
-   // alert(this.onSave)
-   // logOnce(this.settings);
+    let items = {Settings};
+    for(let key in items){
+      let bKey = key[0].toLowerCase()+ key.substring(1);
+      this[bKey]= await new items[key]().load();
+    }
   }
 }

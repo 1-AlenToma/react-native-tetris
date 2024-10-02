@@ -14,17 +14,13 @@ import {
 export const gamePadSize = 60;
 export const gamePadHeight = gamePadSize *4;
 const statusbarHeight = 0;
-const globalState = useState( {
+const globalState = useState({
+  mission: {},
   loaded: false,
-  dbContextChanged: "",
   touchHandled: false,
   audio: gameEffects,
   game: new GridPieces(),
-  dbContext: new DBContext(()=> {
-
-    globalState.dbContextChanged = newId();
-
-  }),
+  dbContext: new DBContext(),
   NUMBER_OF_CELLS_HORIZONTAL: undefined,
   NUMBER_OF_CELLS_VERTICAL: undefined,
   CELL_LENGTH: undefined,
@@ -40,7 +36,9 @@ const globalState = useState( {
   HEIGHT_SCREEN: Dimensions.get('window').height -50,
   sideWidth: 0,
   init: async ()=> {
+    
     await globalState.dbContext.load();
+    await globalState.dbContext.settings.clear();
     globalState.setWidth();
     const subscription = Dimensions.addEventListener(
       'change',

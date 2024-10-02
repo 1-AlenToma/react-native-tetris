@@ -1,15 +1,20 @@
 import Repository from "./Repository";
+import Scores from "./Scores";
 
 export default class AppSettings extends Repository{
   scores = [];
   gamePad = false;
   currentLevel= 1;
-  gameSpeed = 12;
+  gameSpeed = 8;
   gameMaxSpeed = 20;
-  gameDefaultSpeed = 10;
+  gameDefaultSpeed = 8;
   gamePadOpacity = 0.8; // .2 => 1 max
   constructor(){
     super("AppSettings");
+  }
+  
+  getLevelScores(){
+    return this.scores.filter(x=> x.level === this.currentLevel)
   }
   
   // increase level
@@ -30,10 +35,10 @@ export default class AppSettings extends Repository{
   
   async addScore(score){
     try{
-        let aux = this.scores;
+        score.level = this.currentLevel;
+        let aux = this.getLevelScores();
         if(aux === null){
-            aux = [];
-            aux[0] = score;
+            aux = [score];
         }else{
             //Como o array vem em ordem decrescente -> invertemos
             aux.reverse();
@@ -43,7 +48,7 @@ export default class AppSettings extends Repository{
 
             //Precisamos dessa funcao sortNumber porque o metodo sort() trata os elementos
             //do array como strings 
-            const sortNumber = (x, y) => (x - y);
+            const sortNumber = (x, y) => (x.score - y.score);
 
             //ordena o array de forma crescente
             aux.sort(sortNumber);
@@ -51,17 +56,11 @@ export default class AppSettings extends Repository{
             //Como o sort ordena em ordem crescente, uso o reverse() para inverter a order no array
             aux.reverse();
 
-            //Eu só quero guardar os 5 melhores scores -> apago a ultima posicao se o array
-            //tiver mais que 5 elementos
-            if(aux.length > 5)
+            // each level must contain max tow scores
+            if(aux.length > 2)
                 aux.pop();
         }
-
-        //grava o array no AsyncStorage como um String
-        this.scores = aux || [];
-        await this.save();
-        
-
+        this.scores = [...(aux || []).filter(x=> x.score >0), ...this.scores.filter(x=> x.level !== this.currentLevel)]
     }catch(error){
         console.log(error);
     }

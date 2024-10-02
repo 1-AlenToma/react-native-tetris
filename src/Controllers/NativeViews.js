@@ -82,8 +82,9 @@ export const styles = StyleSheet.create({
   txtBtnStart: {
     fontSize: 20,
     color: '#006400',
-    paddingHorizontal: 30,
-    paddingVertical: 20
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    fontWeight:"bold",
   }
 });
 

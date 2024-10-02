@@ -1,4 +1,4 @@
-import {useRef} from "react"
+import {useRef,useState} from "react"
 export default class EventTracker{
   events = {};
   
@@ -6,6 +6,15 @@ export default class EventTracker{
     let id = useRef(newId()).current;
     this.events[id+"-"+name] = fn;
     return this;
+  }
+  
+  hook(){
+    let [_, setUpdater] = useState();
+    this.bindEvent("updater",()=> setUpdater(newId()));
+  }
+  
+  update(){
+    this.getEvent("updater")?.();
   }
   
   getEvent(name){

@@ -7,6 +7,7 @@ export class Piece {
   position = [];
   extra;
   id;
+  rotateTotal = randomBetween(1,5);
   constructor(font, color, extra) {
     if(!generatedColor[font])
        generatedColor[font] = [randomColor(), randomColor()];

@@ -1,33 +1,37 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import EventTracker from "../oAssets/EventTracker";
 
-export default class Repository {
+export default class Repository extends EventTracker {
   timeout;
-  loading = true;
   dbItemKey;
   onSave;
   constructor(dbItemKey) {
+    super();
     this.dbItemKey = dbItemKey;
   }
-  
-  clear(){
+
+  clear() {
     AsyncStorage.removeItem(this.dbItemKey);
+  }
+
+  getIgnoredKeys() {
+    return [...Object.keys(new EventTracker()),
+      ...Object.keys(new Repository(""))];
   }
 
   async save() {
     let data = {
       ...this
     }
+    this.update();
     removeKeys(data,
-      "timeout",
-      "loading",
-      "dbItemKey",
-      "onSave");
-     AsyncStorage.setItem(this.dbItemKey, JSON.stringify(data));
+      this.getIgnoredKeys());
+    AsyncStorage.setItem(this.dbItemKey, JSON.stringify(data));
     this.onSave?.();
+    
   }
 
   async load() {
-    this.loading = true;
     let data = await AsyncStorage.getItem(this.dbItemKey);
     if (data && data.length > 0) {
       data = JSON.parse(data);
@@ -37,18 +41,14 @@ export default class Repository {
     }
 
     this.init();
-    this.loading = false;
+    this.update();
     return this;
   }
 
   init() {
+    const keysToIgnore = this.getIgnoredKeys();
     for (let key in this) {
-      if ([
-        "save",
-        "timeout",
-        "loading",
-        "dbItemKey",
-        "onSave"].includes(key))
+      if (keysToIgnore.includes(key))
         continue;
       let value = this[key];
       Object.defineProperty(this, key, {

@@ -1,6 +1,7 @@
 import Controller from "./NativeViews";
 import SlideDetector from "./SlideDetector";
 import Loader from "./Loader";
+import Dialog from "./Dialog";
 
 const {
   View,
@@ -18,5 +19,6 @@ export {
   Image,
   Icon,
   SlideDetector,
-  Loader
+  Loader,
+  Dialog
 }

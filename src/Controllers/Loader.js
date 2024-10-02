@@ -2,6 +2,7 @@ import {
   View,
   Text
 } from "./NativeViews";
+
 import {
   ActivityIndicator
 } from 'react-native';

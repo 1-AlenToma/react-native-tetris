@@ -7,6 +7,7 @@ export default class GridPieces {
   currentPiece = null;
   nextPieces = [];
   grid = [];
+  playMode = "Endless"; // endless or random
   levelSetting = {
     generatingLevel: false,
     totalGenerated: 0,
@@ -22,20 +23,21 @@ export default class GridPieces {
     this.renderedPieces = {};
     this.currentPiece = null;
     this.nextPieces = [];
+    this.grid = [];
     return this;
   }
 
   updatePieces() {
     if (!this.currentPiece) {
-      if (this.nextPieces.length > 0) {
-        this.currentPiece = this.nextPieces.shift();
-        this.renderedPieces[this.currentPiece.id] = this.currentPiece;
-      }
+        while (this.nextPieces.length < 4) {
+          this.nextPieces.push(this.renderPiece());
+        }
+      
+      this.currentPiece = this.nextPieces.shift();
+      this.renderedPieces[this.currentPiece.id] = this.currentPiece;
     }
 
-    while (this.nextPieces.length < 3) {
-      this.nextPieces.push(this.renderPiece());
-    }
+
 
     return this.currentPiece;
   }
@@ -45,10 +47,12 @@ export default class GridPieces {
   }
 
   createLevel() {
+    
     const totalBlocksToRender = this.grid.length /2;
     // create level map later to calculate betterl!
-    this.levelSetting.totalpointToClear = totalBlocksToRender * randomBetween(100,500);
-    //logOnce(this.levelSetting.totalpointToClear)
+    if(globalState.mission.missionTotalScoreToComplete === undefined){
+    globalState.mission.missionTotalScoreToComplete=this.levelSetting.totalpointToClear = totalBlocksToRender * (100 * globalState.dbContext.settings.currentLevel)
+    }
     if (this.levelSetting.generatingLevel) {
       if (this.levelSetting.totalGenerated < totalBlocksToRender) {
         return true;
@@ -140,10 +144,12 @@ export default class GridPieces {
         -3, middleColumn,
         -2, middleColumn,
         -1, middleColumn
-      ) //I,
+      ), //I,
     }
 
     let piece = blockRegister[randomBetween(0, Object.keys(blockRegister).length-1).toString()];
+    
+    
 
     if (piece.position[0].x < 0 || piece.position[0].x > this.grid[0].length-2)
       return this.renderPiece();
@@ -153,10 +159,13 @@ export default class GridPieces {
     return piece;
   }
 
-  create() {
-    this.currentPiece = null;
-    this.renderedPieces = {};
-    this.grid = [];
+  create(mode) {
+    this.resetLevel();
+    this.mode = mode;
+    if(mode == "Random"){
+      this.levelSetting.generatingLevel = true;
+    }
+    
     for (i = 0; i < globalState.NUMBER_OF_CELLS_VERTICAL(); i++) {
       this.grid[i] = [];
       for (j = 0; j < globalState.NUMBER_OF_CELLS_HORIZONTAL; j++) {
@@ -367,8 +376,6 @@ export default class GridPieces {
     }
   }
 
-
-
   update(entities, {
     touches, dispatch, events
   }) {
@@ -376,28 +383,33 @@ export default class GridPieces {
     this.updatePieces();
 
     if (this.levelSetting.generatingLevel && this.createLevel()) {
-      globalState.audio.disabled = true;
+      //globalState.audio.disable();
+      if(this.currentPiece.rotateTotal >0){
+        this.currentPiece.rotateTotal--;
       this.rotateCurrentPiece();
+      }
 
       while (this.downPiece(dispatch));
       this.levelSetting.totalGenerated = Object.keys(this.renderedPieces).length;
-    }else globalState.audio.disabled = false;
-    if (events.length) {
-      for (let i = 0; i < events.length; i++) {
-        if (events[i].type === 'move-left') {
-          this.moveLeftOrRight(-1);
-        } else if (events[i].type === 'move-right') {
-          this.moveLeftOrRight(1);
-        } else if (events[i].type === 'rotate') {
-          this.rotateCurrentPiece();
-        } else if (events[i].type === 'slide') {
-          while (this.downPiece(dispatch));
-        } else if (events[i].type === 'down') {
-          this.downPiece(dispatch);
-        } else if (events[i].type === 'game-over') {
-          globalState.audio.gameOver();
-        } else if (events[i].type === 'add-score') {
-          globalState.audio.success();
+    } else {
+      //globalState.audio.enable()
+      if (events.length) {
+        for (let i = 0; i < events.length; i++) {
+          if (events[i].type === 'move-left') {
+            this.moveLeftOrRight(-1);
+          } else if (events[i].type === 'move-right') {
+            this.moveLeftOrRight(1);
+          } else if (events[i].type === 'rotate') {
+            this.rotateCurrentPiece();
+          } else if (events[i].type === 'slide') {
+            while (this.downPiece(dispatch));
+          } else if (events[i].type === 'down') {
+            this.downPiece(dispatch);
+          } else if (events[i].type === 'game-over') {
+            globalState.audio.gameOver();
+          } else if (events[i].type === 'add-score') {
+            globalState.audio.success();
+          }
         }
       }
     }
@@ -410,6 +422,7 @@ export default class GridPieces {
         this.currentPiece = null;
         globalState.audio.clear();
         let bonus = 0;
+        
 
         for (let i = this.grid.length-1; i >= 0; i--) {
           if (this.grid[i].filter((value) => {
@@ -426,6 +439,7 @@ export default class GridPieces {
 
             i++;
             if (!this.levelSetting.generatingLevel) {
+              globalState.mission.line(1)
               dispatch( {
                 type: "add-score",
                 score: 100*(++bonus)});

@@ -1,3 +1,4 @@
 import {Piece} from "./Piece";
 import GridPieces from "./GridPieces";
-export {Piece,GridPieces}
+import Missions from "./Missions";
+export {Piece , GridPieces, Missions}

@@ -15,7 +15,7 @@ export default function BestScores( {
         <Text css="fos:20 co:#fff fow:bold mab:5">Best scores</Text>
         {
         data.map(
-          (element, index) => <Text key={index} css="co:#fff"> #{index+1} - {element} </Text>
+          (element, index) => <Text key={index} css="co:#fff"> #{index+1} - {element.score} </Text>
         )
         }
       </View>

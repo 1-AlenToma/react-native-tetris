@@ -42,7 +42,7 @@ export default ({
   children,
   preview
 })=> {
-  globalState.hook("dbContextChanged");
+  globalState.dbContext.settings.hook();
   const btnSize = (screen, window)=> {
     return {
       width: screen.width/2,
