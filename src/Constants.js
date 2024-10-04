@@ -38,7 +38,7 @@ const globalState = useState({
   init: async ()=> {
     
     await globalState.dbContext.load();
-    await globalState.dbContext.settings.clear();
+    //await globalState.dbContext.settings.clear();
     globalState.setWidth();
     const subscription = Dimensions.addEventListener(
       'change',

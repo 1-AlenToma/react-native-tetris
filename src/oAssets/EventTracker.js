@@ -1,6 +1,7 @@
 import {useRef,useState} from "react"
 export default class EventTracker{
   events = {};
+  updateTimeout;
   
   bindEvent(name,fn){
     let id = useRef(newId()).current;
@@ -14,7 +15,11 @@ export default class EventTracker{
   }
   
   update(){
+    
+    clearTimeout(this.updateTimeout)
+    this.updateTimeout = setTimeout(()=>{
     this.getEvent("updater")?.();
+    },100)
   }
   
   getEvent(name){

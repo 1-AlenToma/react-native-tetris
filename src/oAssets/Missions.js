@@ -19,7 +19,7 @@ export default class Missions {
     this.running = true;
     if (this.realStartTime === undefined)
       this.realStartTime = new Date();
-    this.currentScore.time = this.currentScore.time + (Date.now() - this.realStartTime) * this.speed;
+    this.currentScore.time = this.currentScore.time + ((Date.now() - this.realStartTime) )
 
     if (this.running)
       this.timeout = setTimeout(()=> this.start(), 50);
@@ -55,7 +55,7 @@ export default class Missions {
     this.currentScore.score += scoreNr;
     if (this.missionTotalScoreToComplete !== undefined && this.gameMode == "Random" && this.missionTotalScoreToComplete <= this.currentScore.score) {
       this.completed = true;
-      globalState.dbContext.settings.currentLevel++;
+      globalState.dbContext.settings.currentGameSpeed.level++;
       this.gameOver();
     }
   }
