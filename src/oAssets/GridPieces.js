@@ -47,11 +47,10 @@ export default class GridPieces {
   }
 
   createLevel() {
-    
     const totalBlocksToRender = this.grid.length /2;
     // create level map later to calculate betterl!
     if(globalState.mission.missionTotalScoreToComplete === undefined){
-    globalState.mission.missionTotalScoreToComplete=this.levelSetting.totalpointToClear = totalBlocksToRender * (100 * globalState.dbContext.settings.currentLevel)
+    globalState.mission.missionTotalScoreToComplete=this.levelSetting.totalpointToClear = totalBlocksToRender * (100 * globalState.dbContext.settings.currentGameSpeed.level)
     }
     if (this.levelSetting.generatingLevel) {
       if (this.levelSetting.totalGenerated < totalBlocksToRender) {
@@ -439,6 +438,9 @@ export default class GridPieces {
 
             i++;
             if (!this.levelSetting.generatingLevel) {
+              // add a bonus for clearing 4 rows at once
+              if(bonus >= 4)
+                 bonus++;
               globalState.mission.line(1)
               dispatch( {
                 type: "add-score",

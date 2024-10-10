@@ -22,27 +22,26 @@ import {
   Dialog
 } from "./Controllers";
 
-import GamePad from "./Components/GamePad"
 
+
+import GamePad from "./Components/GamePad"
 
 export default function GameMenu( {
   navigation
 }) {
-  
   globalState.dbContext.settings.hook();
-
-  const bestScores = globalState.dbContext.settings.getLevelScores();
-
+  
   return(
     <SafeAreaView bg={require("./assets/tetrisPlayBg_2.gif")} css="container">
-
+     
       <View css="container wi:100% bac:transparent">
+      
         <Image source={logo} css="logo" />
         <Animatable.View animation="rubberBand" easing="ease-out" iterationCount="infinite">
-          <TouchableOpacity css="btnStart" onPress={() => navigation.navigate('Game', { mode:"Random"})}>
-            <Text css="txtBtnStart">Start: (Level:{globalState.dbContext.settings.currentLevel})</Text>
+          <TouchableOpacity css="btnStart" onPress={() => navigation.navigate('Game', { mode: "Random" })}>
+            <Text css="txtBtnStart">Start: (Level:{globalState.dbContext.settings.currentGameSpeed.level})</Text>
           </TouchableOpacity>
-          <TouchableOpacity css="mat:10 btnStart" onPress={() => navigation.navigate('Game', { mode: "Endless"})}>
+          <TouchableOpacity css="mat:10 btnStart" onPress={() => navigation.navigate('Game', { mode: "Endless" })}>
             <Text css="txtBtnStart">Start: (Endless Mode)</Text>
 
           </TouchableOpacity>
@@ -82,7 +81,7 @@ export default function GameMenu( {
             />
         </View>
 
-        <BestScores data={bestScores}></BestScores>
+        <BestScores data={globalState.dbContext.settings.currentGameSpeed.scores}></BestScores>
         <GamePad preview={true} />
       </View>
     </SafeAreaView>

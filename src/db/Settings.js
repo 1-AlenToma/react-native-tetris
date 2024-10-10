@@ -1,42 +1,53 @@
 import Repository from "./Repository";
 import Scores from "./Scores";
+import GameSpeed from "./GameSpeed";
 
 export default class AppSettings extends Repository{
-  scores = [];
+  gameSpeeds =[];
   gamePad = false;
-  currentLevel= 1;
-  gameSpeed = 8;
-  gameMaxSpeed = 20;
-  gameDefaultSpeed = 8;
+  currentGameSpeed;
+  gameSpeed = 15;
+  gameMaxSpeed = 30;
+  gameDefaultSpeed = 15;
   gamePadOpacity = 0.8; // .2 => 1 max
   constructor(){
     super("AppSettings");
+    this.currentGameSpeed = new GameSpeed(this.gameSpeed)
   }
   
-  getLevelScores(){
-    return this.scores.filter(x=> x.level === this.currentLevel)
+  validateGameSpeed(){
+   // return;
+    if(!this.gameSpeeds.find(x=> x.gameSpeed === this.gameSpeed)){
+      this.gameSpeeds.push(new GameSpeed(this.gameSpeed))
+    }
+    if(!this.currentGameSpeed || this.currentGameSpeed.gameSpeed !== this.gameSpeed)
+    this.currentGameSpeed= this.gameSpeeds.find(x=> x.gameSpeed === this.gameSpeed)
   }
   
-  // increase level
+  // increase speed
   inc(){
     if(this.gameSpeed +1> this.gameMaxSpeed)
         this.gameSpeed = this.gameDefaultSpeed;
       else
       this.gameSpeed++;
+      
+    this.validateGameSpeed();
+   // this.update();
   }
   
   gameValidSpeed(){
     let value = this.gameSpeed - this.gameDefaultSpeed;
     
     value = this.gameDefaultSpeed - value;
+    
     return value >0 ?value  :1;
        
   }
   
   async addScore(score){
     try{
-        score.level = this.currentLevel;
-        let aux = this.getLevelScores();
+         
+        let aux = this.currentGameSpeed.scores;
         if(aux === null){
             aux = [score];
         }else{
@@ -60,7 +71,8 @@ export default class AppSettings extends Repository{
             if(aux.length > 2)
                 aux.pop();
         }
-        this.scores = [...(aux || []).filter(x=> x.score >0), ...this.scores.filter(x=> x.level !== this.currentLevel)]
+        this.currentGameSpeed.scores = (aux || []);
+      await  this.save();
     }catch(error){
         console.log(error);
     }

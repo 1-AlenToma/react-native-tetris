@@ -1,10 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import EventTracker from "../oAssets/EventTracker";
 
+let dataMap = new Map();
 export default class Repository extends EventTracker {
-  timeout;
+  RepositoryTimeout;
   dbItemKey;
   onSave;
+  initiolized = false;
   constructor(dbItemKey) {
     super();
     this.dbItemKey = dbItemKey;
@@ -20,19 +22,24 @@ export default class Repository extends EventTracker {
   }
 
   async save() {
+    return;
     let data = {
       ...this
     }
-    this.update();
     removeKeys(data,
       this.getIgnoredKeys());
-    AsyncStorage.setItem(this.dbItemKey, JSON.stringify(data));
-    this.onSave?.();
+    let jsonData = JSON.stringify(data);
+    if(dataMap.get(this.dbItemKey) == jsonData)
+       return;
+    dataMap.set(this.dbItemKey,jsonData)
+    this.update();
     
+    AsyncStorage.setItem(this.dbItemKey, jsonData);
+    this.onSave?.();
   }
 
   async load() {
-    let data = await AsyncStorage.getItem(this.dbItemKey);
+    let data =dataMap.get(this.dbItemKey) ?? await AsyncStorage.getItem(this.dbItemKey);
     if (data && data.length > 0) {
       data = JSON.parse(data);
       for (let key in data) {
@@ -46,6 +53,8 @@ export default class Repository extends EventTracker {
   }
 
   init() {
+    if(this.initiolized)
+      return;
     const keysToIgnore = this.getIgnoredKeys();
     for (let key in this) {
       if (keysToIgnore.includes(key))
@@ -56,9 +65,11 @@ export default class Repository extends EventTracker {
         get: ()=> value,
         set: (v)=> {
           value = v;
-          this.timeout = setTimeout(()=>this.save(), 10);
+          this.save()
         }
       })
     }
+    
+    this.initiolized = true;
   }
 }

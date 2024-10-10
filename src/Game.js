@@ -16,7 +16,8 @@ import {
   SafeAreaView,
   SlideDetector,
   Dialog,
-  Text
+  Text,
+  TextSplash
 } from "./Controllers"
 
 import {
@@ -46,13 +47,14 @@ export default function App( {
   globalState.dbContext.settings.hook();
   globalState.hook("mission", "mission.completed", "mission.running");
   let audioState = globalState.audio.useAudioState();
-
+  const timer = useTime();
   const state = buildState( {
     engine: {},
     visible:false,
     text:"",
     btnNext: "",
-    btnHome:""
+    btnHome:"",
+    textScore: ""
   }).ignore("engine").build();
   
   const startGame = ()=>{
@@ -93,6 +95,7 @@ export default function App( {
       state.visible = true;
       globalState.audio.disable();
     } else if (e.type === "add-score") {
+      state.textScore = e.score;
       globalState.mission.score(e.score);
     }
   }
@@ -110,6 +113,9 @@ export default function App( {
   const GestureRecognizerView = globalState.dbContext.settings.gamePad ? View: SlideDetector;
   return(
     <SafeAreaView bgStyle={ { opacity: .2 }} bg={audioState.bg} css="container fld:row juc:flex-start ali:flex-start">
+      <TextSplash text={state.textScore} onAnimationEnd={()=>{
+        timer.create(()=> state.textScore = "")
+      }} />
       <Dialog css="ali:center" title="Congrats" height={200} visible={state.visible}>
         <Text css="fos:18 fow:bold co:red">
           {state.text}
